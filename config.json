@@ -1,0 +1,12 @@
+{
+  "conversions": [
+    {
+      "input_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/Weibo.conf",
+      "output_file": "Weibo_AdBlock.sgmodule"
+    },
+    {
+      "input_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/Ximalaya.conf",
+      "output_file": "Ximalaya_AdBlock.sgmodule"
+    }
+  ]
+}
