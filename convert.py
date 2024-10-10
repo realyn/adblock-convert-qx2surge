@@ -11,10 +11,10 @@ CONFIG = {
             "desc": "Converted from QX Weibo AdBlock Rules"
         },
         {
-          "input_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/Ximalaya.conf",
-          "output_file": "Ximalaya_AdBlock.sgmodule",
-          "name": "Ximalaya AdBlock for Surge",
-          "desc": "Converted from QX Ximalaya AdBlock Rules"
+            "input_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/Ximalaya.conf",
+            "output_file": "Ximalaya_AdBlock.sgmodule",
+            "name": "Ximalaya AdBlock for Surge",
+            "desc": "Converted from QX Ximalaya AdBlock Rules"
         }
     ]
 }
@@ -93,6 +93,10 @@ def process_file(input_url, output_file, name, desc):
         print(f"File size: {os.path.getsize(output_file)} bytes")
     except Exception as e:
         print(f"Error handling file: {e}")
+    
+    # 添加调试信息
+    print(f"Current working directory: {os.getcwd()}")
+    print(f"Files in current directory: {os.listdir()}")
 
 def main():
     for conversion in CONFIG['conversions']:
