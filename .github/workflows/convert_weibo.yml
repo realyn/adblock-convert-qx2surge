@@ -37,16 +37,4 @@ jobs:
         git add Weibo_AdBlock.sgmodule
         git commit -m "Auto convert Weibo AdBlock to Surge module"
         git push
-    - name: Commit changes
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add Weibo_AdBlock.sgmodule
-        git commit -m "Auto convert Weibo AdBlock to Surge module" -a
-    - name: Push changes
-      run: |
-        git config --local user.email "github-actions[bot]@users.noreply.github.com"
-        git config --local user.name "github-actions[bot]"
-        git add Weibo_AdBlock.sgmodule
-        git commit -m "Auto convert Weibo AdBlock to Surge module" -a || echo "No changes to commit"
-        git push
+
