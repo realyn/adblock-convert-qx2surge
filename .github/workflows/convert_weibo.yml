@@ -1,4 +1,4 @@
-name: Convert Weibo AdBlock
+name: Convert QX to Surge
 
 on:
   schedule:
@@ -20,34 +20,18 @@ jobs:
         pip install requests
     - name: Run conversion script
       run: python convert.py
-
     - name: Check generated file
       run: |
         echo "File content:"
-        cat Weibo_AdBlock.sgmodule
+        cat *.sgmodule
         echo "File stats:"
-        ls -l Weibo_AdBlock.sgmodule
+        ls -l *.sgmodule
         echo "Git status:"
         git status
-
-    - name: Check for changes
-      id: check_changes
-      run: |
-        git status --porcelain
-        if [ -n "$(git status --porcelain)" ]; then
-          echo "changes=true" >> $GITHUB_OUTPUT
-          echo "Changes detected"
-        else
-          echo "changes=false" >> $GITHUB_OUTPUT
-          echo "No changes detected"
-        fi
-
     - name: Commit and push if changed
-      if: steps.check_changes.outputs.changes == 'true'
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
-        git add Weibo_AdBlock.sgmodule
-        git commit -m "Auto convert Weibo AdBlock to Surge module"
+        git add *.sgmodule
+        git commit -m "Auto convert AdBlock to Surge module" -a || echo "No changes to commit"
         git push
-        echo "Changes committed and pushed"
