@@ -1,0 +1,32 @@
+name: Convert Weibo AdBlock
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # 每天运行
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+    - name: Run conversion script
+      run: python convert.py
+    - name: Commit changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add Weibo_AdBlock.sgmodule
+        git commit -m "Auto convert Weibo AdBlock to Surge module" -a
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
