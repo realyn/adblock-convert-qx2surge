@@ -44,7 +44,7 @@ def convert_to_surge(qx_content):
         if content:
             surge_content += f"{section}\n" + "\n".join(content) + "\n\n"
     
-    print(f"Generated Surge content (first 100 characters):\n{surge_content[:100]}...")
+    print(f"Generated Surge content (first 500 characters):\n{surge_content[:500]}...")
     return surge_content
 
 # 获取原始QX配置
@@ -52,7 +52,7 @@ qx_url = "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/We
 response = requests.get(qx_url)
 qx_content = response.text
 
-print(f"Fetched QX content (first 100 characters):\n{qx_content[:100]}...")
+print(f"Fetched QX content (first 500 characters):\n{qx_content[:500]}...")
 
 # 转换
 surge_content = convert_to_surge(qx_content)
