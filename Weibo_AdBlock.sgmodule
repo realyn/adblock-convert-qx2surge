@@ -4,10 +4,6 @@
 # Original QX Config Source: https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/Weibo.conf
 
 [URL Rewrite]
-
-# - reject
-
-# - reject
 # > 微博_AD_Preload@ddgksf2013
 ^https?:\/\/api\.weibo\.cn\/\d\/ad\/preload - reject
 # > 微博国际版_趋势页热门影片@ddgksf2013
@@ -70,7 +66,7 @@ weibo_json = type=http-response,pattern=^https?:\/\/m?api\.weibo\.c(n|om)\/\d\/c
 weibo_search_info = type=http-response,pattern=^https?:\/\/weibointl\.api\.weibo\.c(n|om)\/portal\.php.*a=get_searching_info,requires-body=1,max-size=0,script-path=https://github.com/ddgksf2013/Scripts/raw/master/weibo_search_info.json
 # > 微博国际版_屏蔽search_topic@shiro
 weibo_search_topic = type=http-response,pattern=^https?:\/\/weibointl\.api\.weibo\.c(n|om)\/portal\.php.*feed&a=search_topic,requires-body=1,max-size=0,script-path=https://github.com/ddgksf2013/Scripts/raw/master/weibo_search_topic.json
-# > 微博国际版_屏蔽开屏广告@ddgksf2013 
+# > 微博国际版_屏蔽开屏广告@ddgksf2013
 weibo_json = type=http-response,pattern=^https?:\/\/weibointl\.api\.weibo\.c(n|om)\/portal\.php.*get_coopen_ads,requires-body=1,max-size=0,script-path=https://github.com/ddgksf2013/Scripts/raw/master/weibo_json.js
 # > 微博国际版_屏蔽sdkad@ddgksf2013
 weibo_json = type=http-response,pattern=^https?://(sdk|wb)app\.uve\.weibo\.com(/interface/sdk/sdkad.php|/wbapplua/wbpullad.lua),requires-body=1,max-size=0,script-path=https://github.com/ddgksf2013/Scripts/raw/master/weibo_json.js
