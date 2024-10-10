@@ -1,96 +1,92 @@
 import requests
-import re
 import os
-import hashlib
 
 def convert_to_surge(qx_content):
+    print("Starting conversion process...")
     surge_content = "#!name=Weibo AdBlock for Surge\n#!desc=Converted from QX Weibo AdBlock Rules\n\n"
     
     sections = {
-        "[URL Rewrite]": [],
-        "[Map Local]": [],
-        "[Script]": [],
-        "[MITM]": []
+        "URL Rewrite": [],
+        "Map Local": [],
+        "Script": [],
+        "MITM": []
     }
     
     current_section = None
     
-    print("Starting conversion process...")
     for line in qx_content.split('\n'):
         line = line.strip()
+        if not line or line.startswith('//'):
+            continue
+        
         if line.startswith('#'):
-            continue
-        if line in sections:
-            current_section = line
-            print(f"Entering section: {current_section}")
-            continue
-        if not line or not current_section:
-            continue
+            potential_section = line.strip('#').strip()
+            if potential_section in sections:
+                current_section = potential_section
+                print(f"Identified section: {current_section}")
+                continue
         
-        print(f"Processing line in {current_section}: {line}")
-        
-        if current_section == "[URL Rewrite]":
-            if "reject" in line:
+        if current_section:
+            print(f"Processing line in {current_section}: {line}")
+            if current_section == "URL Rewrite" and "reject" in line:
                 parts = line.split()
-                sections[current_section].append(f"{parts[0]} - reject")
-        elif current_section == "[Map Local]":
-            if "data=" in line:
+                converted_line = f"{parts[0]} - reject"
+                sections[current_section].append(converted_line)
+                print(f"Converted to: {converted_line}")
+            elif current_section == "Map Local" and "data=" in line:
                 sections[current_section].append(line)
-        elif current_section == "[Script]":
-            if "type=http-response" not in line:
-                line = line.replace("script-response-body", "type=http-response,requires-body=1,max-size=0,script-path=")
-            sections[current_section].append(line)
-        elif current_section == "[MITM]":
-            if line.startswith("hostname"):
-                sections[current_section].append(line.replace("hostname = ", "hostname = %APPEND% "))
-
+                print(f"Added to Map Local: {line}")
+            elif current_section == "Script":
+                if "type=http-response" not in line:
+                    converted_line = line.replace("script-response-body", "type=http-response,requires-body=1,max-size=0,script-path=")
+                    sections[current_section].append(converted_line)
+                    print(f"Converted to: {converted_line}")
+                else:
+                    sections[current_section].append(line)
+                    print(f"Added to Script: {line}")
+            elif current_section == "MITM" and line.startswith("hostname"):
+                converted_line = line.replace("hostname = ", "hostname = %APPEND% ")
+                sections[current_section].append(converted_line)
+                print(f"Converted to: {converted_line}")
+    
     for section, content in sections.items():
         if content:
-            surge_content += f"{section}\n" + "\n".join(content) + "\n\n"
-        print(f"Content for {section}:")
-        print("\n".join(content))
-        print()
+            surge_content += f"[{section}]\n" + "\n".join(content) + "\n\n"
     
-    print(f"Generated Surge content (first 500 characters):\n{surge_content[:500]}...")
+    print("Conversion process completed.")
     return surge_content
 
 # 获取原始QX配置
 qx_url = "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/Weibo.conf"
+print(f"Fetching QX content from URL: {qx_url}")
 response = requests.get(qx_url)
 qx_content = response.text
 
 print(f"Fetched QX content (first 500 characters):\n{qx_content[:500]}...")
+print(f"Total length of fetched content: {len(qx_content)} characters")
 
 # 转换
+print("Starting conversion to Surge format...")
 surge_content = convert_to_surge(qx_content)
+
+print(f"Generated Surge content (first 500 characters):\n{surge_content[:500]}...")
+print(f"Total length of generated Surge content: {len(surge_content)} characters")
 
 # 写入Surge模块
 output_file = 'Weibo_AdBlock.sgmodule'
+print(f"Attempting to write content to file: {output_file}")
 try:
-    # 如果文件已存在，先读取其内容并计算哈希值
-    if os.path.exists(output_file):
-        with open(output_file, 'r', encoding='utf-8') as f:
-            existing_content = f.read()
-        existing_hash = hashlib.md5(existing_content.encode()).hexdigest()
-        print(f"Existing file hash: {existing_hash}")
-    else:
-        existing_hash = None
-        print("No existing file found")
-
-    # 计算新内容的哈希值
-    new_hash = hashlib.md5(surge_content.encode()).hexdigest()
-    print(f"New content hash: {new_hash}")
-
-    # 比较哈希值
-    if existing_hash != new_hash:
-        with open(output_file, 'w', encoding='utf-8') as f:
-            f.write(surge_content)
-        print(f"Content changed. Successfully wrote to {output_file}")
-    else:
-        print("Content unchanged. File not updated.")
-
+    with open(output_file, 'w', encoding='utf-8') as f:
+        f.write(surge_content)
+    print(f"Successfully wrote to {output_file}")
     print(f"File size: {os.path.getsize(output_file)} bytes")
+    
+    # 读取文件内容进行验证
+    with open(output_file, 'r', encoding='utf-8') as f:
+        file_content = f.read()
+    print(f"Verification - File content (first 500 characters):\n{file_content[:500]}...")
+    print(f"Verification - Total length of file content: {len(file_content)} characters")
 except Exception as e:
     print(f"Error handling file: {e}")
 
-print("Conversion completed.")
+print("Conversion and file writing process completed.")
