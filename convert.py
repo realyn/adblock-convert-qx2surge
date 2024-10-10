@@ -15,15 +15,19 @@ def convert_to_surge(qx_content):
     
     current_section = None
     
+    print("Starting conversion process...")
     for line in qx_content.split('\n'):
         line = line.strip()
         if line.startswith('#'):
             continue
         if line in sections:
             current_section = line
+            print(f"Entering section: {current_section}")
             continue
         if not line or not current_section:
             continue
+        
+        print(f"Processing line in {current_section}: {line}")
         
         if current_section == "[URL Rewrite]":
             if "reject" in line:
@@ -43,6 +47,9 @@ def convert_to_surge(qx_content):
     for section, content in sections.items():
         if content:
             surge_content += f"{section}\n" + "\n".join(content) + "\n\n"
+        print(f"Content for {section}:")
+        print("\n".join(content))
+        print()
     
     print(f"Generated Surge content (first 500 characters):\n{surge_content[:500]}...")
     return surge_content
