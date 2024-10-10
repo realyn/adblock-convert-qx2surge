@@ -33,19 +33,19 @@ def convert_to_surge(qx_content, name, desc, input_url):
     }
     
     current_section = None
-    last_comment = ""
     
     for line in qx_content.split('\n'):
         stripped_line = line.strip()
-        if stripped_line.startswith('# >'):
-            last_comment = line
-            continue
-        
         if not stripped_line:
             continue
         
         if stripped_line.startswith('hostname = '):
             sections["MITM"].append(stripped_line.replace("hostname = ", "hostname = %APPEND% "))
+            continue
+        
+        if stripped_line.startswith('#'):
+            # 保存注释，但不立即添加到任何部分
+            last_comment = stripped_line
             continue
         
         if "reject" in stripped_line:
@@ -63,7 +63,7 @@ def convert_to_surge(qx_content, name, desc, input_url):
                 script_name = os.path.basename(script_path).split('.')[0]
                 sections["Script"].extend([last_comment, f"{script_name} = type={script_type},pattern={pattern},requires-body=1,max-size=0,script-path={script_path}"])
         
-        last_comment = ""
+        last_comment = ""  # 重置注释，因为它已经被使用了
     
     for section, content in sections.items():
         if content:
