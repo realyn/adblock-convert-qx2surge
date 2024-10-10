@@ -2,7 +2,10 @@ import requests
 import os
 
 def convert_to_surge(qx_content):
-    surge_content = "#!name=Weibo AdBlock for Surge\n#!desc=Converted from QX Weibo AdBlock Rules\n\n"
+    surge_content = "#!name=Weibo AdBlock for Surge\n"
+    surge_content += "#!desc=Converted from QX Weibo AdBlock Rules\n"
+    surge_content += "# Weibo Surge Module Source: https://github.com/realyn/weibo-adblock-surge\n"
+    surge_content += "# Original QX Config Source: https://github.com/ddgksf2013/Rewrite/raw/master/AdBlock/Weibo.conf\n\n"
     
     sections = {
         "URL Rewrite": [],
@@ -14,27 +17,33 @@ def convert_to_surge(qx_content):
     current_section = None
     
     for line in qx_content.split('\n'):
-        line = line.strip()
-        if not line or line.startswith('//') or line.startswith('#'):
+        stripped_line = line.strip()
+        if stripped_line.startswith('//') or stripped_line.startswith('#'):
+            surge_content += line + '\n'
             continue
         
-        if line.startswith('hostname = '):
-            sections["MITM"].append(line.replace("hostname = ", "hostname = %APPEND% "))
+        if not stripped_line:
+            surge_content += '\n'
             continue
         
-        if "reject" in line:
-            parts = line.split()
+        if stripped_line.startswith('hostname = '):
+            sections["MITM"].append(stripped_line.replace("hostname = ", "hostname = %APPEND% "))
+            continue
+        
+        if "reject" in stripped_line:
+            parts = stripped_line.split()
             if len(parts) >= 2:
                 sections["URL Rewrite"].append(f"{parts[0]} - reject")
-        elif "data=" in line:
-            sections["Map Local"].append(line)
-        elif "script-response-body" in line or "script-request-body" in line:
-            parts = line.split()
+        elif "data=" in stripped_line:
+            sections["Map Local"].append(stripped_line)
+        elif "script-response-body" in stripped_line or "script-request-body" in stripped_line:
+            parts = stripped_line.split()
             if len(parts) >= 4:
-                script_type = "http-response" if "script-response-body" in line else "http-request"
+                script_type = "http-response" if "script-response-body" in stripped_line else "http-request"
                 pattern = parts[0]
                 script_path = parts[-1]
-                sections["Script"].append(f"{os.path.basename(script_path).split('.')[0]} = type={script_type},pattern={pattern},requires-body=1,max-size=0,script-path={script_path}")
+                script_name = os.path.basename(script_path).split('.')[0]
+                sections["Script"].append(f"{script_name} = type={script_type},pattern={pattern},requires-body=1,max-size=0,script-path={script_path}")
     
     for section, content in sections.items():
         if content:
