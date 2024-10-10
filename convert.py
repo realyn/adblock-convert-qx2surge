@@ -15,15 +15,15 @@ def convert_to_surge(qx_content):
     }
     
     current_section = None
+    last_comment = ""
     
     for line in qx_content.split('\n'):
         stripped_line = line.strip()
-        if stripped_line.startswith('//') or stripped_line.startswith('#'):
-            surge_content += line + '\n'
+        if stripped_line.startswith('# >'):
+            last_comment = line
             continue
         
         if not stripped_line:
-            surge_content += '\n'
             continue
         
         if stripped_line.startswith('hostname = '):
@@ -33,9 +33,9 @@ def convert_to_surge(qx_content):
         if "reject" in stripped_line:
             parts = stripped_line.split()
             if len(parts) >= 2:
-                sections["URL Rewrite"].append(f"{parts[0]} - reject")
+                sections["URL Rewrite"].extend([last_comment, f"{parts[0]} - reject"])
         elif "data=" in stripped_line:
-            sections["Map Local"].append(stripped_line)
+            sections["Map Local"].extend([last_comment, stripped_line])
         elif "script-response-body" in stripped_line or "script-request-body" in stripped_line:
             parts = stripped_line.split()
             if len(parts) >= 4:
@@ -43,7 +43,9 @@ def convert_to_surge(qx_content):
                 pattern = parts[0]
                 script_path = parts[-1]
                 script_name = os.path.basename(script_path).split('.')[0]
-                sections["Script"].append(f"{script_name} = type={script_type},pattern={pattern},requires-body=1,max-size=0,script-path={script_path}")
+                sections["Script"].extend([last_comment, f"{script_name} = type={script_type},pattern={pattern},requires-body=1,max-size=0,script-path={script_path}"])
+        
+        last_comment = ""
     
     for section, content in sections.items():
         if content:
