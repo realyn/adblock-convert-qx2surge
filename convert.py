@@ -2,7 +2,6 @@ import requests
 import os
 
 def convert_to_surge(qx_content):
-    print("Starting conversion process...")
     surge_content = "#!name=Weibo AdBlock for Surge\n#!desc=Converted from QX Weibo AdBlock Rules\n\n"
     
     sections = {
@@ -16,44 +15,29 @@ def convert_to_surge(qx_content):
     
     for line in qx_content.split('\n'):
         line = line.strip()
-        if not line or line.startswith('//'):
+        if not line or line.startswith('//') or line.startswith('#'):
             continue
         
-        if line.startswith('#'):
-            potential_section = line.strip('#').strip()
-            if potential_section in sections:
-                current_section = potential_section
-                print(f"Identified section: {current_section}")
-                continue
+        if line.startswith('hostname = '):
+            sections["MITM"].append(line.replace("hostname = ", "hostname = %APPEND% "))
+            continue
         
-        if current_section:
-            print(f"Processing line in {current_section}: {line}")
-            if current_section == "URL Rewrite" and "reject" in line:
-                parts = line.split()
-                converted_line = f"{parts[0]} - reject"
-                sections[current_section].append(converted_line)
-                print(f"Converted to: {converted_line}")
-            elif current_section == "Map Local" and "data=" in line:
-                sections[current_section].append(line)
-                print(f"Added to Map Local: {line}")
-            elif current_section == "Script":
-                if "type=http-response" not in line:
-                    converted_line = line.replace("script-response-body", "type=http-response,requires-body=1,max-size=0,script-path=")
-                    sections[current_section].append(converted_line)
-                    print(f"Converted to: {converted_line}")
-                else:
-                    sections[current_section].append(line)
-                    print(f"Added to Script: {line}")
-            elif current_section == "MITM" and line.startswith("hostname"):
-                converted_line = line.replace("hostname = ", "hostname = %APPEND% ")
-                sections[current_section].append(converted_line)
-                print(f"Converted to: {converted_line}")
+        if "reject" in line:
+            parts = line.split()
+            if len(parts) >= 2:
+                sections["URL Rewrite"].append(f"{parts[0]} - reject")
+        elif "data=" in line:
+            sections["Map Local"].append(line)
+        elif "script-response-body" in line or "script-request-body" in line:
+            parts = line.split()
+            if len(parts) >= 4:
+                script_type = "http-response" if "script-response-body" in line else "http-request"
+                sections["Script"].append(f"{parts[3].split('=')[1]} = type={script_type},pattern={parts[0]},requires-body=1,max-size=0,script-path={parts[3].split('=')[1]}")
     
     for section, content in sections.items():
         if content:
             surge_content += f"[{section}]\n" + "\n".join(content) + "\n\n"
     
-    print("Conversion process completed.")
     return surge_content
 
 # 获取原始QX配置
