@@ -1,7 +1,7 @@
 #!name=Weibo AdBlock for Surge
 #!desc=Converted from QX Weibo AdBlock Rules
-# Weibo Surge Module Source: https://github.com/realyn/weibo-adblock-surge
-# Original QX Config Source: https://github.com/ddgksf2013/Rewrite/raw/master/AdBlock/Weibo.conf
+# Surge Module Source: https://github.com/realyn/weibo-adblock-surge
+# Original QX Config Source: https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/Weibo.conf
 
 [URL Rewrite]
 
