@@ -32,7 +32,9 @@ def convert_to_surge(qx_content):
             parts = line.split()
             if len(parts) >= 4:
                 script_type = "http-response" if "script-response-body" in line else "http-request"
-                sections["Script"].append(f"{parts[3].split('=')[1]} = type={script_type},pattern={parts[0]},requires-body=1,max-size=0,script-path={parts[3].split('=')[1]}")
+                pattern = parts[0]
+                script_path = parts[-1]
+                sections["Script"].append(f"{os.path.basename(script_path).split('.')[0]} = type={script_type},pattern={pattern},requires-body=1,max-size=0,script-path={script_path}")
     
     for section, content in sections.items():
         if content:
