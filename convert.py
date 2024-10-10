@@ -1,5 +1,6 @@
 import requests
 import os
+import json
 
 def convert_to_surge(qx_content):
     surge_content = "#!name=Weibo AdBlock for Surge\n"
@@ -53,37 +54,35 @@ def convert_to_surge(qx_content):
     
     return surge_content
 
-# 获取原始QX配置
-qx_url = "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/Weibo.conf"
-print(f"Fetching QX content from URL: {qx_url}")
-response = requests.get(qx_url)
-qx_content = response.text
+def process_file(input_url, output_file):
+    print(f"Fetching QX content from URL: {input_url}")
+    response = requests.get(input_url)
+    qx_content = response.text
 
-print(f"Fetched QX content (first 500 characters):\n{qx_content[:500]}...")
-print(f"Total length of fetched content: {len(qx_content)} characters")
+    print(f"Fetched QX content (first 500 characters):\n{qx_content[:500]}...")
+    print(f"Total length of fetched content: {len(qx_content)} characters")
 
-# 转换
-print("Starting conversion to Surge format...")
-surge_content = convert_to_surge(qx_content)
+    print("Starting conversion to Surge format...")
+    surge_content = convert_to_surge(qx_content)
 
-print(f"Generated Surge content (first 500 characters):\n{surge_content[:500]}...")
-print(f"Total length of generated Surge content: {len(surge_content)} characters")
+    print(f"Generated Surge content (first 500 characters):\n{surge_content[:500]}...")
+    print(f"Total length of generated Surge content: {len(surge_content)} characters")
 
-# 写入Surge模块
-output_file = 'Weibo_AdBlock.sgmodule'
-print(f"Attempting to write content to file: {output_file}")
-try:
-    with open(output_file, 'w', encoding='utf-8') as f:
-        f.write(surge_content)
-    print(f"Successfully wrote to {output_file}")
-    print(f"File size: {os.path.getsize(output_file)} bytes")
+    print(f"Attempting to write content to file: {output_file}")
+    try:
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(surge_content)
+        print(f"Successfully wrote to {output_file}")
+        print(f"File size: {os.path.getsize(output_file)} bytes")
+    except Exception as e:
+        print(f"Error handling file: {e}")
+
+def main():
+    with open('config.json', 'r') as config_file:
+        config = json.load(config_file)
     
-    # 读取文件内容进行验证
-    with open(output_file, 'r', encoding='utf-8') as f:
-        file_content = f.read()
-    print(f"Verification - File content (first 500 characters):\n{file_content[:500]}...")
-    print(f"Verification - Total length of file content: {len(file_content)} characters")
-except Exception as e:
-    print(f"Error handling file: {e}")
+    for conversion in config['conversions']:
+        process_file(conversion['input_url'], conversion['output_file'])
 
-print("Conversion and file writing process completed.")
+if __name__ == "__main__":
+    main()
