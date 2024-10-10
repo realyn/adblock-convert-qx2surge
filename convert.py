@@ -1,6 +1,19 @@
 import requests
 import os
-import json
+
+# 配置直接在脚本中定义
+CONFIG = {
+    "conversions": [
+        {
+            "input_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/Weibo.conf",
+            "output_file": "Weibo_AdBlock.sgmodule"
+        },
+        {
+          "input_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/Ximalaya.conf",
+          "output_file": "Ximalaya_AdBlock.sgmodule"
+        }
+    ]
+}
 
 def convert_to_surge(qx_content):
     surge_content = "#!name=Weibo AdBlock for Surge\n"
@@ -78,10 +91,7 @@ def process_file(input_url, output_file):
         print(f"Error handling file: {e}")
 
 def main():
-    with open('config.json', 'r') as config_file:
-        config = json.load(config_file)
-    
-    for conversion in config['conversions']:
+    for conversion in CONFIG['conversions']:
         process_file(conversion['input_url'], conversion['output_file'])
 
 if __name__ == "__main__":
