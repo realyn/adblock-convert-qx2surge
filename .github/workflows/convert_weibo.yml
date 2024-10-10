@@ -23,8 +23,12 @@ jobs:
 
     - name: Check generated file
       run: |
-        ls -l Weibo_AdBlock.sgmodule
+        echo "File content:"
         cat Weibo_AdBlock.sgmodule
+        echo "File stats:"
+        ls -l Weibo_AdBlock.sgmodule
+        echo "Git status:"
+        git status
 
     - name: Check for changes
       id: check_changes
@@ -32,8 +36,10 @@ jobs:
         git status --porcelain
         if [ -n "$(git status --porcelain)" ]; then
           echo "changes=true" >> $GITHUB_OUTPUT
+          echo "Changes detected"
         else
           echo "changes=false" >> $GITHUB_OUTPUT
+          echo "No changes detected"
         fi
 
     - name: Commit and push if changed
@@ -44,3 +50,4 @@ jobs:
         git add Weibo_AdBlock.sgmodule
         git commit -m "Auto convert Weibo AdBlock to Surge module"
         git push
+        echo "Changes committed and pushed"
