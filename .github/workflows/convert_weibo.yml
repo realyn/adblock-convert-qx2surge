@@ -20,6 +20,12 @@ jobs:
         pip install requests
     - name: Run conversion script
       run: python convert.py
+
+    - name: Check generated file
+      run: |
+        ls -l Weibo_AdBlock.sgmodule
+        cat Weibo_AdBlock.sgmodule
+
     - name: Check for changes
       id: check_changes
       run: |
@@ -29,6 +35,7 @@ jobs:
         else
           echo "changes=false" >> $GITHUB_OUTPUT
         fi
+
     - name: Commit and push if changed
       if: steps.check_changes.outputs.changes == 'true'
       run: |
@@ -37,4 +44,3 @@ jobs:
         git add Weibo_AdBlock.sgmodule
         git commit -m "Auto convert Weibo AdBlock to Surge module"
         git push
-
