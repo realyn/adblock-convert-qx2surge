@@ -12,6 +12,8 @@ def convert_to_surge(qx_content):
     }
     
     current_section = None
+    print(f"Generated Surge content:\n{surge_content}")  # 添加这行
+    return surge_content
     
     for line in qx_content.split('\n'):
         line = line.strip()
@@ -44,16 +46,23 @@ def convert_to_surge(qx_content):
     
     return surge_content
 
-# 获取原始QX配置
 qx_url = "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/Weibo.conf"
 response = requests.get(qx_url)
 qx_content = response.text
+
+print(f"Fetched QX content (first 100 characters):\n{qx_content[:100]}...")  # 添加这行
 
 # 转换
 surge_content = convert_to_surge(qx_content)
 
 # 写入Surge模块
-with open('Weibo_AdBlock.sgmodule', 'w', encoding='utf-8') as f:
-    f.write(surge_content)
+output_file = 'Weibo_AdBlock.sgmodule'
+try:
+    with open(output_file, 'w', encoding='utf-8') as f:
+        f.write(surge_content)
+    print(f"Successfully wrote to {output_file}")
+    print(f"File size: {os.path.getsize(output_file)} bytes")
+except Exception as e:
+    print(f"Error writing to file: {e}")
 
-print("Conversion completed. Surge module saved as Weibo_AdBlock.sgmodule")
+print("Conversion completed.")
