@@ -6,20 +6,24 @@ CONFIG = {
     "conversions": [
         {
             "input_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/Weibo.conf",
-            "output_file": "Weibo_AdBlock.sgmodule"
+            "output_file": "Weibo_AdBlock.sgmodule",
+            "name": "Weibo AdBlock for Surge",
+            "desc": "Converted from QX Weibo AdBlock Rules"
         },
         {
           "input_url": "https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/Ximalaya.conf",
-          "output_file": "Ximalaya_AdBlock.sgmodule"
+          "output_file": "Ximalaya_AdBlock.sgmodule",
+          "name": "Ximalaya AdBlock for Surge",
+          "desc": "Converted from QX Ximalaya AdBlock Rules"
         }
     ]
 }
 
-def convert_to_surge(qx_content):
-    surge_content = "#!name=Weibo AdBlock for Surge\n"
-    surge_content += "#!desc=Converted from QX Weibo AdBlock Rules\n"
-    surge_content += "# Weibo Surge Module Source: https://github.com/realyn/weibo-adblock-surge\n"
-    surge_content += "# Original QX Config Source: https://github.com/ddgksf2013/Rewrite/raw/master/AdBlock/Weibo.conf\n\n"
+def convert_to_surge(qx_content, name, desc, input_url):
+    surge_content = f"#!name={name}\n"
+    surge_content += f"#!desc={desc}\n"
+    surge_content += f"# Surge Module Source: https://github.com/realyn/weibo-adblock-surge\n"
+    surge_content += f"# Original QX Config Source: {input_url}\n\n"
     
     sections = {
         "URL Rewrite": [],
@@ -67,7 +71,7 @@ def convert_to_surge(qx_content):
     
     return surge_content
 
-def process_file(input_url, output_file):
+def process_file(input_url, output_file, name, desc):
     print(f"Fetching QX content from URL: {input_url}")
     response = requests.get(input_url)
     qx_content = response.text
@@ -76,7 +80,7 @@ def process_file(input_url, output_file):
     print(f"Total length of fetched content: {len(qx_content)} characters")
 
     print("Starting conversion to Surge format...")
-    surge_content = convert_to_surge(qx_content)
+    surge_content = convert_to_surge(qx_content, name, desc, input_url)
 
     print(f"Generated Surge content (first 500 characters):\n{surge_content[:500]}...")
     print(f"Total length of generated Surge content: {len(surge_content)} characters")
@@ -92,7 +96,7 @@ def process_file(input_url, output_file):
 
 def main():
     for conversion in CONFIG['conversions']:
-        process_file(conversion['input_url'], conversion['output_file'])
+        process_file(conversion['input_url'], conversion['output_file'], conversion['name'], conversion['desc'])
 
 if __name__ == "__main__":
     main()
