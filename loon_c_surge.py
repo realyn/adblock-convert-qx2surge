@@ -6,18 +6,33 @@ def fetch_loon_plugin(url):
     return response.text
 
 def convert_to_surge(loon_content):
-    # 移除 Loon 特定的头部信息
-    surge_content = re.sub(r'#!.*\n', '', loon_content)
+    # 移除 #!loon_version 行
+    surge_content = re.sub(r'#!loon_version.*\n', '', loon_content)
+    
+    # 保留其他注释和元数据
+    surge_content = re.sub(r'(#!.*\n)', r'#\1', surge_content)
+    
+    # 转换 [Rewrite] 为 [URL Rewrite] 和 [Map Local]
+    rewrite_section = re.search(r'\[Rewrite\](.*?)\[', surge_content, re.DOTALL)
+    if rewrite_section:
+        rewrite_content = rewrite_section.group(1)
+        url_rewrite = []
+        map_local = []
+        for line in rewrite_content.strip().split('\n'):
+            if 'reject-dict' in line:
+                map_local.append(line.replace('reject-dict', 'data="{}"\ndata-type=text'))
+            else:
+                url_rewrite.append(line)
+        
+        surge_content = surge_content.replace('[Rewrite]', '[URL Rewrite]\n' + '\n'.join(url_rewrite) + '\n\n[Map Local]\n' + '\n'.join(map_local))
     
     # 转换脚本部分
-    surge_content = re.sub(r'(.+) = type=http-response, pattern=(.+), script-path=(.+)',
-                           r'\1 = type=http-response, pattern=\2, script-path=\3, requires-body=true',
+    surge_content = re.sub(r'http-response (.*) script-path = (.*), requires-body = true, tag = (.*)',
+                           r'\3 = type=http-response, pattern=\1, requires-body=true, script-path=\2',
                            surge_content)
     
-    # 添加 MITM 的 %APPEND%
-    surge_content = surge_content.replace('hostname =', 'hostname = %APPEND%')
-    
-    # 这里可以添加更多转换规则
+    # 修改 MITM 部分
+    surge_content = surge_content.replace('[MitM]', '[MITM]')
     
     return surge_content
 
