@@ -22,12 +22,16 @@ jobs:
         pip install requests
         
     - name: Run conversion script
-      run: python loon_c_surge.py  # 这里改为 loon_c_surge.py
+      run: python loon_c_surge.py
+      
+    - name: List generated files
+      run: |
+        ls -R loon_c_surge
       
     - name: Commit and push if changed
       run: |
         git config --global user.name 'GitHub Action'
         git config --global user.email 'action@github.com'
-        git add weibo_Adblock_from_loon.sgmodule
-        git commit -m "Update Surge module" || exit 0
+        git add loon_c_surge
+        git commit -m "Update Surge modules" || exit 0
         git push
