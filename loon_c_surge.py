@@ -51,8 +51,8 @@ def process_url(url):
     file_name = os.path.basename(parsed_url.path)
     file_name = file_name.replace('.plugin', '.sgmodule')
     
-    # 创建输出目录
-    output_dir = 'loon_c_surge'
+    # 使用绝对路径创建输出目录
+    output_dir = os.path.join(os.getcwd(), 'loon_c_surge')
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     
