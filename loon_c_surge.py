@@ -9,8 +9,12 @@ def convert_to_surge(loon_content):
     # 移除 #!loon_version 行
     surge_content = re.sub(r'#!loon_version.*\n', '', loon_content)
     
-    # 保留其他注释和元数据
-    surge_content = re.sub(r'(#!.*\n)', r'#\1', surge_content)
+    # 移除 #!system 和 #!system_version 行
+    surge_content = re.sub(r'#!system.*\n', '', surge_content)
+    surge_content = re.sub(r'#!system_version.*\n', '', surge_content)
+    
+    # 保留其他注释和元数据，但不添加额外的 #
+    surge_content = re.sub(r'(#!.*\n)', r'\1', surge_content)
     
     # 转换 [Rewrite] 为 [URL Rewrite] 和 [Map Local]
     rewrite_section = re.search(r'\[Rewrite\](.*?)\[', surge_content, re.DOTALL)
