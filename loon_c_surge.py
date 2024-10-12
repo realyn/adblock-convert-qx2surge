@@ -1,5 +1,7 @@
 import requests
 import re
+import os
+from urllib.parse import urlparse
 
 def fetch_loon_plugin(url):
     response = requests.get(url)
@@ -40,13 +42,36 @@ def convert_to_surge(loon_content):
     
     return surge_content
 
-def main():
-    loon_url = "https://raw.githubusercontent.com/luestr/ProxyResource/main/Tool/Loon/Plugin/Weibo_remove_ads.plugin"
-    loon_content = fetch_loon_plugin(loon_url)
+def process_url(url):
+    loon_content = fetch_loon_plugin(url)
     surge_content = convert_to_surge(loon_content)
     
-    with open('weibo_Adblock_from_loon.sgmodule', 'w') as f:
+    # 从 URL 中提取文件名
+    parsed_url = urlparse(url)
+    file_name = os.path.basename(parsed_url.path)
+    file_name = file_name.replace('.plugin', '.sgmodule')
+    
+    # 创建输出目录
+    output_dir = 'loon_c_surge'
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    
+    # 保存文件
+    output_path = os.path.join(output_dir, file_name)
+    with open(output_path, 'w') as f:
         f.write(surge_content)
+    
+    print(f"Converted {file_name} and saved to {output_path}")
+
+def main():
+    urls = [
+        "https://raw.githubusercontent.com/luestr/ProxyResource/main/Tool/Loon/Plugin/Amap_remove_ads.plugin",
+        "https://raw.githubusercontent.com/luestr/ProxyResource/main/Tool/Loon/Plugin/ColorfulClouds_remove_ads.plugin",
+        "https://raw.githubusercontent.com/luestr/ProxyResource/main/Tool/Loon/Plugin/Weibo_remove_ads.plugin"
+    ]
+    
+    for url in urls:
+        process_url(url)
 
 if __name__ == "__main__":
     main()
