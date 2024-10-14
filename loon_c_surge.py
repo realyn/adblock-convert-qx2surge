@@ -93,7 +93,8 @@ def main():
     urls = [
         "https://raw.githubusercontent.com/luestr/ProxyResource/main/Tool/Loon/Plugin/Amap_remove_ads.plugin",
         "https://raw.githubusercontent.com/luestr/ProxyResource/main/Tool/Loon/Plugin/ColorfulClouds_remove_ads.plugin",
-        "https://raw.githubusercontent.com/luestr/ProxyResource/main/Tool/Loon/Plugin/Weibo_remove_ads.plugin"
+        "https://raw.githubusercontent.com/luestr/ProxyResource/main/Tool/Loon/Plugin/Weibo_remove_ads.plugin",
+        "https://raw.githubusercontent.com/luestr/ProxyResource/main/Tool/Loon/Plugin/DiDi_remove_ads.plugin"
     ]
     
     for url in urls:
