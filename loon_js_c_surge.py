@@ -1,6 +1,7 @@
 import os
 import requests
 from urllib.parse import urlparse
+import re
 
 def fetch_js_content(url):
     response = requests.get(url)
@@ -12,14 +13,39 @@ def fetch_js_content(url):
 
 def extract_metadata(js_content):
     metadata = {}
-    lines = js_content.split('\n')
-    for line in lines:
-        if line.startswith('/*') or line.startswith('*/') or line.strip() == '':
-            continue
-        if line.startswith('*'):
-            key, value = line[1:].strip().split(':', 1)
-            metadata[key.strip()] = value.strip()
+    pattern = r'/\*[\s\S]*?\*/'
+    comment_block = re.search(pattern, js_content)
+    if comment_block:
+        lines = comment_block.group().split('\n')
+        for line in lines[1:-1]:  # Skip the first and last lines
+            if ':' in line:
+                key, value = line.split(':', 1)
+                metadata[key.strip()] = value.strip()
     return metadata
+
+def extract_rules(js_content):
+    rules = []
+    pattern = r'DOMAIN(?:-SUFFIX)?,\s*([^,]+),\s*REJECT'
+    matches = re.findall(pattern, js_content)
+    for match in matches:
+        rules.append(f"DOMAIN{'-SUFFIX' if '.com' in match else ''}, {match}, REJECT")
+    return rules
+
+def extract_url_rewrites(js_content):
+    rewrites = []
+    pattern = r'\$done\(\{ url: \$request\.url\.replace\(/(.+?)/, "(.+?)"\) \}\);'
+    matches = re.findall(pattern, js_content)
+    for match in matches:
+        rewrites.append(f"{match[0]} {match[1]} 302")
+    return rewrites
+
+def extract_scripts(js_content, js_url):
+    scripts = []
+    pattern = r'\/\*\*.+?\*\/\n.*?function\s+(\w+)'
+    matches = re.findall(pattern, js_content, re.DOTALL)
+    for match in matches:
+        scripts.append(f"{match} = type=http-response,pattern=^https?://.*$,requires-body=1,max-size=0,script-path={js_url}")
+    return scripts
 
 def convert_to_sgmodule(js_content, js_filename, js_url):
     metadata = extract_metadata(js_content)
@@ -33,26 +59,23 @@ def convert_to_sgmodule(js_content, js_filename, js_url):
         if key not in ['name', 'desc']:
             sgmodule_content += f'#!{key}={value}\n'
     
-    sgmodule_content += '''
-[Rule]
-# 移除广告下发请求
-AND, ((URL-REGEX, ^http:\/\/amdc\.m\.taobao\.com\/amdc\/mobileDispatch), (USER-AGENT, AMapiPhone*)), REJECT
-
-DOMAIN, amap-aos-info-nogw.amap.com, REJECT
-DOMAIN, free-aos-cdn-image.amap.com, REJECT
-DOMAIN-SUFFIX, v.smtcdns.com, REJECT
-
-[URL Rewrite]
-# Placeholder for URL Rewrite rules
-
-[Map Local]
-# Placeholder for Map Local rules
-
-[Script]
-'''
+    rules = extract_rules(js_content)
+    url_rewrites = extract_url_rewrites(js_content)
+    scripts = extract_scripts(js_content, js_url)
     
-    # Add the main script
-    sgmodule_content += f'{base_filename} = type=http-response,pattern=^https?://.*$,requires-body=1,max-size=0,script-path={js_url}\n'
+    if rules:
+        sgmodule_content += '\n[Rule]\n'
+        sgmodule_content += '# 移除广告下发请求\n'
+        sgmodule_content += 'AND, ((URL-REGEX, ^http:\/\/amdc\.m\.taobao\.com\/amdc\/mobileDispatch), (USER-AGENT, AMapiPhone*)), REJECT\n'
+        sgmodule_content += '\n'.join(rules) + '\n'
+    
+    if url_rewrites:
+        sgmodule_content += '\n[URL Rewrite]\n'
+        sgmodule_content += '\n'.join(url_rewrites) + '\n'
+    
+    if scripts:
+        sgmodule_content += '\n[Script]\n'
+        sgmodule_content += '\n'.join(scripts) + '\n'
     
     sgmodule_content += '''
 [MITM]
