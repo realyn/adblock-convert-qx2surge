@@ -1,6 +1,20 @@
 #!name=Weibo_remove_ads
 #!desc=Converted from Weibo_remove_ads.js
 
+[Rule]
+# 移除广告下发请求
+AND, ((URL-REGEX, ^http:\/\/amdc\.m\.taobao\.com\/amdc\/mobileDispatch), (USER-AGENT, AMapiPhone*)), REJECT
+
+DOMAIN, amap-aos-info-nogw.amap.com, REJECT
+DOMAIN, free-aos-cdn-image.amap.com, REJECT
+DOMAIN-SUFFIX, v.smtcdns.com, REJECT
+
+[URL Rewrite]
+# Placeholder for URL Rewrite rules
+
+[Map Local]
+# Placeholder for Map Local rules
+
 [Script]
 Weibo_remove_ads = type=http-response,pattern=^https?://.*$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/luestr/ProxyResource/refs/heads/main/Resource/Script/Weibo/Weibo_remove_ads.js
 
