@@ -11,77 +11,47 @@ def fetch_js_content(url):
         print(f"Failed to fetch content from {url}")
         return None
 
-def extract_metadata(js_content):
-    metadata = {}
-    pattern = r'/\*[\s\S]*?\*/'
-    comment_block = re.search(pattern, js_content)
-    if comment_block:
-        lines = comment_block.group().split('\n')
-        for line in lines[1:-1]:  # Skip the first and last lines
-            if ':' in line:
-                key, value = line.split(':', 1)
-                metadata[key.strip()] = value.strip()
-    return metadata
-
-def extract_rules(js_content):
-    rules = []
-    pattern = r'DOMAIN(?:-SUFFIX)?,\s*([^,]+),\s*REJECT'
-    matches = re.findall(pattern, js_content)
-    for match in matches:
-        rules.append(f"DOMAIN{'-SUFFIX' if '.com' in match else ''}, {match}, REJECT")
-    return rules
-
-def extract_url_rewrites(js_content):
-    rewrites = []
-    pattern = r'\$done\(\{ url: \$request\.url\.replace\(/(.+?)/, "(.+?)"\) \}\);'
-    matches = re.findall(pattern, js_content)
-    for match in matches:
-        rewrites.append(f"{match[0]} {match[1]} 302")
-    return rewrites
-
-def extract_scripts(js_content, js_url):
-    scripts = []
-    pattern = r'\/\*\*.+?\*\/\n.*?function\s+(\w+)'
-    matches = re.findall(pattern, js_content, re.DOTALL)
-    for match in matches:
-        scripts.append(f"{match} = type=http-response,pattern=^https?://.*$,requires-body=1,max-size=0,script-path={js_url}")
-    return scripts
-
 def convert_to_sgmodule(js_content, js_filename, js_url):
-    metadata = extract_metadata(js_content)
-    base_filename = os.path.splitext(js_filename)[0]
+    # Extract metadata from the first comment block
+    metadata_match = re.search(r'/\*([\s\S]*?)\*/', js_content)
+    metadata = metadata_match.group(1) if metadata_match else ''
     
-    sgmodule_content = f'''#!name={metadata.get('name', base_filename)}
-#!desc={metadata.get('desc', f'Converted from {js_filename}')}
-'''
-    
-    for key, value in metadata.items():
-        if key not in ['name', 'desc']:
-            sgmodule_content += f'#!{key}={value}\n'
-    
-    rules = extract_rules(js_content)
-    url_rewrites = extract_url_rewrites(js_content)
-    scripts = extract_scripts(js_content, js_url)
-    
-    if rules:
-        sgmodule_content += '\n[Rule]\n'
-        sgmodule_content += '# 移除广告下发请求\n'
-        sgmodule_content += 'AND, ((URL-REGEX, ^http:\/\/amdc\.m\.taobao\.com\/amdc\/mobileDispatch), (USER-AGENT, AMapiPhone*)), REJECT\n'
-        sgmodule_content += '\n'.join(rules) + '\n'
-    
-    if url_rewrites:
-        sgmodule_content += '\n[URL Rewrite]\n'
-        sgmodule_content += '\n'.join(url_rewrites) + '\n'
-    
-    if scripts:
-        sgmodule_content += '\n[Script]\n'
-        sgmodule_content += '\n'.join(scripts) + '\n'
-    
-    sgmodule_content += '''
+    # Start building the sgmodule content
+    sgmodule_content = f'''#!name={js_filename.replace('.js', '')}
+#!desc=Converted from {js_filename}
+{metadata.strip()}
+
+[Script]
+{js_filename.replace('.js', '')} = type=http-response,pattern=^https?://.*$,requires-body=1,max-size=0,script-path={js_url}
+
 [MITM]
 hostname = %APPEND% *
 '''
+
+    # Extract URL Rewrite rules
+    url_rewrite_rules = re.findall(r'(\^https?://.*?) url (reject-dict|reject-array|reject-200|reject-img|reject|request-body|response-body|echo-response|script-response-body|script-request-header|script-request-body|script-response-header|script-echo-response|script-analyze-echo-response).*', js_content)
     
+    if url_rewrite_rules:
+        sgmodule_content += '\n[URL Rewrite]\n'
+        for rule in url_rewrite_rules:
+            sgmodule_content += f'{rule[0]} - {rule[1]}\n'
+
+    # Extract Map Local rules
+    map_local_rules = re.findall(r'(\^https?://.*?) data="(.*?)"', js_content)
+    
+    if map_local_rules:
+        sgmodule_content += '\n[Map Local]\n'
+        for rule in map_local_rules:
+            sgmodule_content += f'{rule[0]} data="{rule[1]}"\n'
+
+    # Extract General rules
+    general_rules = re.findall(r'(URL-REGEX|DOMAIN|DOMAIN-SUFFIX|DOMAIN-KEYWORD|IP-CIDR|IP-CIDR6|GEOIP|USER-AGENT|URL-REGEX|IP-ASN),.*', js_content)
+    
+    if general_rules:
+        sgmodule_content += '\n[Rule]\n'
+        for rule in general_rules:
+            sgmodule_content += f'{rule}\n'
+
     return sgmodule_content
 
 def save_sgmodule(content, filename):
