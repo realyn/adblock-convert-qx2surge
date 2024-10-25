@@ -1,9 +1,0 @@
-#!name=Weibo_remove_ads
-#!desc=Converted from Weibo_remove_ads.js
-引用地址：https://raw.githubusercontent.com/RuCu6/Loon/main/Scripts/weibo.js
-
-[Script]
-Weibo_remove_ads = type=http-response,pattern=^https?://.*$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/luestr/ProxyResource/refs/heads/main/Resource/Script/Weibo/Weibo_remove_ads.js
-
-[MITM]
-hostname = %APPEND% *
