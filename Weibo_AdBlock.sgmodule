@@ -4,6 +4,8 @@
 # Original QX Config Source: https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/Weibo.conf
 
 [URL Rewrite]
+# > 微博_搜索页默认填充词@ddgksf2013
+^https?:\/\/api\.weibo\.cn\/!\/was\/finder\/searchbarchange - reject
 # > 微博_AD_Preload@ddgksf2013
 ^https?:\/\/api\.weibo\.cn\/\d\/ad\/preload - reject
 # > 微博国际版_趋势页热门影片@ddgksf2013
