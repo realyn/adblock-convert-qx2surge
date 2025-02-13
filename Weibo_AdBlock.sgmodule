@@ -4,20 +4,20 @@
 # Original QX Config Source: https://raw.githubusercontent.com/ddgksf2013/Rewrite/master/AdBlock/Weibo.conf
 
 [URL Rewrite]
+# > 微博_启动感兴趣弹窗@ddgksf2013
+^https?:\/\/api\.weibo\.cn\/.*account\/recommend_interesttags - reject
 # > 微博_首页顶部直播推荐Tab@ddgksf2013
 ^https?:\/\/api\.weibo\.cn\/.*\/media_homelist - reject
 # > 微博_搜索页默认填充词@ddgksf2013
 ^https?:\/\/api\.weibo\.cn\/.*finder\/searchbarchange - reject
 # > 微博_AD_Preload@ddgksf2013
 ^https?:\/\/api\.weibo\.cn\/\d\/ad\/preload - reject
-# > 微博国际版_趋势页热门影片@ddgksf2013
-^https?:\/\/api\.weibo\.cn\/\d\/cardlist\?v_f=.*Weibo_intl - reject
 # > 微博_用户推荐弹窗@ddgksf2013
 ^https?:\/\/api\.weibo\.cn\/\d\/profile\/recommend_popuser - reject
 # > 微博_每日一次的开屏广告请求@ddgksf2013
 ^https?:\/\/boot.*weibo\.com\/v\d\/ad\/realtime - reject
 # > 微博_去除底部超话栏表层浮icon及tips@ddgksf2013
-^https?:\/\/api\.weibo\.cn\/\d\/!\/huati\/discovery_home_bottom_getdotinfo - reject
+^https?:\/\/api\.weibo\.cn\/.*discovery_home_bottom_getdotinfo - reject
 # > 微博_屏蔽首页左上角每日的弹窗tips@ddgksf2013
 ^https?:\/\/m?api\.weibo\.c(n|om)\/\d/push/daily - reject
 # > 微博_应用内弹窗广告@ddgksf2013
@@ -26,6 +26,8 @@
 ^https?:\/\/sdkapp\.uve\.weibo\.com\/interface\/sdk\/sdkconfig\.php - reject
 # > 微博_Spotlight@ddgksf2013
 ^https?:\/\/m?api\.weibo\.c(n|om)\/\d\/hot\/hours_spotlight - reject
+# > 微博国际版_趋势页热门影片@ddgksf2013
+^https?:\/\/api\.weibo\.cn\/\d\/cardlist\?v_f=.*Weibo_intl - reject
 # > 微博国际版_屏蔽hotsearch@ddgksf2013
 ^https?:\/\/weibointl\.api\.weibo\.c(n|om)\/portal\.php\?a=hot_search_users - reject
 # > 微博国际版_屏蔽热推荐@ddgksf2013
@@ -34,8 +36,6 @@
 [Script]
 # > 微博_首页顶部homeExtend@ddgksf2013
 weibo_json = type=http-response,pattern=^https?:\/\/api\.weibo\.cn\/\d\/groups\/allgroups\/v\d,requires-body=1,max-size=0,script-path=https://github.com/ddgksf2013/Scripts/raw/master/weibo_json.js
-# > 微博国际版_帖子下方广告banner@ddgksf2013
-weibo_json = type=http-response,pattern=^https?:\/\/weibointl\.api\.weibo\.cn\/portal\.php\?a=open_app,requires-body=1,max-size=0,script-path=https://github.com/ddgksf2013/Scripts/raw/master/weibo_json.js
 # > 微博_开屏广告预加载处理@ddgksf2013
 weibo_json = type=http-response,pattern=^https?:\/\/boot.*weibo\.com\/v\d\/ad\/preload,requires-body=1,max-size=0,script-path=https://github.com/ddgksf2013/Scripts/raw/master/weibo_json.js
 # > 微博_未登陆状态下首页信息流处理@ddgksf2013
@@ -66,6 +66,8 @@ weibo_json = type=http-response,pattern=^https?:\/\/m?api\.weibo\.c(n|om)\/\d\/s
 weibo_json = type=http-response,pattern=^https?:\/\/m?api\.weibo\.c(n|om)\/\d\/(checkin/show|\!/live/media_homelist|comments/build_comments|container/get_item),requires-body=1,max-size=0,script-path=https://github.com/ddgksf2013/Scripts/raw/master/weibo_json.js
 
 weibo_json = type=http-response,pattern=^https?:\/\/m?api\.weibo\.c(n|om)\/\d\/cardlist,requires-body=1,max-size=0,script-path=https://github.com/ddgksf2013/Scripts/raw/master/weibo_json.js
+# > 微博国际版_帖子下方广告banner@ddgksf2013
+weibo_json = type=http-response,pattern=^https?:\/\/weibointl\.api\.weibo\.cn\/portal\.php\?a=open_app,requires-body=1,max-size=0,script-path=https://github.com/ddgksf2013/Scripts/raw/master/weibo_json.js
 # > 微博国际版_屏蔽searching_info@shiro
 weibo_search_info = type=http-response,pattern=^https?:\/\/weibointl\.api\.weibo\.c(n|om)\/portal\.php.*a=get_searching_info,requires-body=1,max-size=0,script-path=https://github.com/ddgksf2013/Scripts/raw/master/weibo_search_info.json
 # > 微博国际版_屏蔽search_topic@shiro
